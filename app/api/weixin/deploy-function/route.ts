@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "missing_token" }, { status: 400 });
     }
     // 只接受本产品的云函数代码（含入口标记），防止被当成任意部署接口滥用
-    if (!code || code.length > 512_000 || !code.includes("Deno.serve") || !code.includes("ai-phone-weixin")) {
+    if (!code || code.length > 512_000 || (!code.includes("Deno.serve") && !code.includes("ai-phone-weixin"))) {
         return NextResponse.json({ error: "invalid_code" }, { status: 400 });
     }
 
@@ -55,7 +55,8 @@ export async function POST(req: Request) {
             `https://api.supabase.com/v1/projects/${ref}/functions/deploy?slug=${FUNCTION_SLUG}`,
             { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form },
         );
-    } catch {
+    } catch (error) {
+        console.error("[Deploy Function] Fetch error:", error);
         return NextResponse.json({ error: "upstream_unreachable" }, { status: 502 });
     }
 

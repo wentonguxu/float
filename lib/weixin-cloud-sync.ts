@@ -406,8 +406,8 @@ export async function deployWeixinCloudFunction(accessToken: string): Promise<vo
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ref, token, code }),
     });
-  } catch {
-    throw new Error("无法访问站点部署接口，请检查网络后重试；也可改用下方「手动部署方式」。");
+  } catch (err) {
+    throw new Error("无法访问站点部署接口，请检查网络后重试；也可改用下方「手动部署方式」。原因: " + (err instanceof Error ? err.message : String(err)));
   }
   if (res.status === 502) {
     throw new Error("服务器暂时连不上 Supabase 管理接口，请稍后重试；也可改用下方「手动部署方式」。");
