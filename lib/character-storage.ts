@@ -175,12 +175,11 @@ export function parseCharacterFromJson(
       return null;
     }
 
-    const src = (obj.schema === "ai_phone_character" && typeof obj.data === "object" && obj.data !== null)
-      ? obj.data as Record<string, unknown>
-      : obj;
-
-    if (UNSUPPORTED_CHARACTER_IMPORT_FIELDS.some((field) => field in src || field in obj)) {
-      throw new Error(CHAR_BLOCKED_FIELDS);
+    let src = obj;
+    if (obj.schema === "ai_phone_character" && typeof obj.data === "object" && obj.data !== null) {
+      src = obj.data as Record<string, unknown>;
+    } else if (typeof obj.spec === "string" && obj.spec.startsWith("chara_card_") && typeof obj.data === "object" && obj.data !== null) {
+      src = obj.data as Record<string, unknown>;
     }
 
     return {
@@ -263,14 +262,18 @@ export function parseCharacterFromPng(
   buffer: ArrayBuffer
 ): CharacterImportData | null {
   const u8 = new Uint8Array(buffer);
-  const charaBase64 = readPngTextChunk(u8, "ai_phone_character");
+  const charaBase64 = readPngTextChunk(u8, "ai_phone_character") || readPngTextChunk(u8, "chara");
   if (!charaBase64) return null;
 
   try {
-    const jsonStr = decodeURIComponent(escape(atob(charaBase64)));
+    let jsonStr = "";
+    try {
+      jsonStr = decodeURIComponent(escape(atob(charaBase64)));
+    } catch {
+      jsonStr = new TextDecoder().decode(Uint8Array.from(atob(charaBase64), c => c.charCodeAt(0)));
+    }
     return parseCharacterFromJson(jsonStr);
   } catch (e) {
-    if (e instanceof Error && e.message === CHAR_BLOCKED_FIELDS) throw e;
     return null;
   }
 }
