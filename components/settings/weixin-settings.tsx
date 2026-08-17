@@ -753,7 +753,7 @@ export function WeixinSettings({ onOpenDataManagement }: { onOpenDataManagement?
                                     placeholder="粘贴 Access Token（sbp_ 开头）"
                                     value={cloudDeployToken}
                                     onChange={e => setCloudDeployToken(e.target.value)}
-                                    autoComplete="off"
+                                    autoComplete="new-password"
                                 />
                                 <button
                                     type="button"
