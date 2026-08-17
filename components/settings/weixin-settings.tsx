@@ -758,8 +758,14 @@ export function WeixinSettings({ onOpenDataManagement }: { onOpenDataManagement?
                                 <button
                                     type="button"
                                     className="ui-btn ui-btn-outline mt-0.5 self-start whitespace-nowrap !gap-1.5 !px-3 !text-[12px]"
-                                    disabled={!cloudSupabaseReady || Boolean(cloudAssistantBusy) || !cloudDeployToken.trim()}
-                                    onClick={() => void handleDeployCloudFunction()}
+                                    disabled={!cloudSupabaseReady || Boolean(cloudAssistantBusy)}
+                                    onClick={() => {
+                                        if (!cloudDeployToken.trim()) {
+                                            setCloudAssistantNotice({ ok: false, text: "请先在上方输入框粘贴 Supabase Access Token (或者检查是否被浏览器错误地自动填充了其他密码)。" });
+                                            return;
+                                        }
+                                        void handleDeployCloudFunction();
+                                    }}
                                 >
                                     {cloudAssistantBusy === "deploy"
                                         ? <><Loader2 size={14} className="animate-spin" /> 部署中…</>
